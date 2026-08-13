@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UzLang Platform — O'zbek Tili Infratuzilmasi va Transliteratsiya API</title>
+    <meta name="description" content="O'zbek tili uchun enterprise darajasidagi transliteratsiya API platformasi. Kirill va Lotin matnlari hamda PDF, DOCX, TXT hujjatlarini real-vaqtda o'girish.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core Stylesheet -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Top Glass Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="logo-mark">
+                    <i class="fa-solid fa-language"></i>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">UzLang<span class="brand-accent">API</span></span>
+                    <span class="brand-version">v1.0 • Enterprise</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#playground" class="nav-link active"><i class="fa-solid fa-terminal"></i> Playground</a>
+                <a href="/docs" target="_blank" class="nav-link"><i class="fa-solid fa-code"></i> API Spec</a>
+                <a href="/v1/ocr/status" target="_blank" class="nav-link"><i class="fa-solid fa-server"></i> OCR Status</a>
+            </nav>
+
+            <div class="nav-right">
+                <div class="status-indicator">
+                    <span class="pulse-ring"></span>
+                    <span class="status-text">Tizim Faol</span>
+                </div>
+                <a href="/docs" target="_blank" class="btn btn-outline-sm">
+                    <i class="fa-solid fa-book-open"></i> Hujjatlar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="app-main">
+        <!-- Hero Header Section -->
+        <section class="hero-section">
+            <div class="badge-pill">
+                <i class="fa-solid fa-sparkles"></i> High-Speed Uzbek Transliteration Infrastructure
+            </div>
+            <h1 class="hero-heading">O'zbek tili uchun <span class="text-gradient">Aqlli Transliteratsiyalash</span> Platformasi</h1>
+            <p class="hero-subtext">Matnlar, <strong>PDF kitoblar, DOCX va TXT</strong> hujjatlarini Kirill va Lotin alifbolari o'rtasida aniq va tez transliteratsiya qiling.</p>
+        </section>
+
+        <!-- Mode Segmented Control Tabs -->
+        <div class="segmented-control">
+            <button id="mode-text-btn" class="segment-btn active" onclick="switchMode('text')">
+                <i class="fa-solid fa-align-left"></i> Matn Transliteratsiyasi
+            </button>
+            <button id="mode-file-btn" class="segment-btn" onclick="switchMode('file')">
+                <i class="fa-solid fa-file-pdf"></i> Fayl & Skaner Kitob (.pdf, .docx, .txt)
+            </button>
+        </div>
+
+        <!-- Interactive Core Playground -->
+        <section id="playground" class="playground-wrapper">
+            <div class="panel-card">
+                
+                <!-- Direction & Sample Controls Bar -->
+                <div class="panel-toolbar">
+                    <div class="direction-switch-group">
+                        <button id="btn-latin-to-cyrillic" class="dir-tab active" onclick="setDirection('latin_to_cyrillic')">
+                            <span>Lotin</span> <i class="fa-solid fa-arrow-right"></i> <span>Kirill</span>
+                        </button>
+                        <button id="swap-btn" class="swap-icon-btn" onclick="swapDirection()" title="Yo'nalishni almashtirish">
+                            <i class="fa-solid fa-right-left"></i>
+                        </button>
+                        <button id="btn-cyrillic-to-latin" class="dir-tab" onclick="setDirection('cyrillic_to_latin')">
+                            <span>Kirill</span> <i class="fa-solid fa-arrow-right"></i> <span>Lotin</span>
+                        </button>
+                    </div>
+
+                    <div id="text-samples" class="sample-chips-group">
+                        <span class="sample-title">Namunalar:</span>
+                        <button class="chip-btn" onclick="loadSample(1)">Konstitutsiya</button>
+                        <button class="chip-btn" onclick="loadSample(2)">Digraf & Tutuq</button>
+                        <button class="chip-btn" onclick="loadSample(3)">Grammatika</button>
+                    </div>
+                </div>
+
+                <!-- Mode 1: Live Dual Text Editors -->
+                <div id="text-mode-view" class="dual-editor-grid">
+                    <!-- Source Text Pane -->
+                    <div class="editor-column source-column">
+                        <div class="pane-bar">
+                            <span id="source-label" class="pane-heading"><i class="fa-solid fa-pen-to-square"></i> Lotin matni (Manba)</span>
+                            <button class="action-icon-btn" onclick="clearSource()" title="Tozalash"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <textarea id="source-text" placeholder="Matnni shu yerga kiriting..." oninput="onSourceInput()" autofocus>O'zbekiston Respublikasi kelajagi buyuk davlatdir. Ma'no va e'tibor bilan shahar va qishloqlarni obod qilamiz.</textarea>
+                        <div class="pane-status">
+                            <span id="source-stats">0 belgilar | 0 so'zlar</span>
+                        </div>
+                    </div>
+
+                    <!-- Target Text Pane -->
+                    <div class="editor-column target-column">
+                        <div class="pane-bar">
+                            <span id="target-label" class="pane-heading"><i class="fa-solid fa-bolt"></i> Kirill matni (Natija)</span>
+                            <div class="pane-right-actions">
+                                <span id="latency-badge" class="speed-pill"><i class="fa-solid fa-stopwatch"></i> 0.0 ms</span>
+                                <button class="action-icon-btn" onclick="copyResult()" title="Nusxalash"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div id="target-text" class="output-preview"></div>
+                        <div class="pane-status">
+                            <span id="target-stats">0 belgilar</span>
+                            <span class="engine-badge"><i class="fa-solid fa-microchip"></i> Context-Engine v1.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode 2: Document & Book Processing View -->
+                <div id="file-mode-view" class="file-processing-view hidden">
+                    <div class="drop-zone-box" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-icon-wrapper">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3 class="drop-heading">Hujjat yoki Kitobni shu yerga tashlang</h3>
+                        <p class="drop-subtext">Qo'llab-quvvatlanadi: <strong>.PDF (skaner va matn), .DOCX, .TXT</strong></p>
+                        <input type="file" id="file-input" accept=".docx,.pdf,.txt" onchange="onFileSelected(this.files[0])" hidden>
+                    </div>
+
+                    <!-- File Details Card -->
+                    <div id="file-selected-card" class="file-card hidden">
+                        <div class="file-card-info">
+                            <div class="file-card-icon">
+                                <i id="file-type-icon" class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            <div class="file-card-text">
+                                <span id="file-name" class="file-card-name">hujjat.pdf</span>
+                                <span id="file-size" class="file-card-size">0 KB</span>
+                            </div>
+                        </div>
+                        <div class="file-card-actions">
+                            <button id="btn-process-file" class="btn btn-primary" onclick="uploadAndTransliterateFile()">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Transliteratsiya va Yuklab olish
+                            </button>
+                            <button class="action-icon-btn" onclick="removeSelectedFile()" title="O'chirish"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Progress and Live OCR Logs Card -->
+                    <div id="file-progress-container" class="progress-log-card hidden">
+                        <div class="progress-card-header">
+                            <span class="progress-title-text">
+                                <i id="progress-spinner" class="fa-solid fa-spinner fa-spin hidden"></i> 
+                                <span id="progress-status-text">Jarayon boshlanmoqda...</span>
+                            </span>
+                            <span id="progress-percent" class="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="progress-bar-fill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-meta">
+                            <span id="progress-page-info">Sahifa 0 / 0</span>
+                            <span id="progress-time-info">Vaqt: 0.0s</span>
+                        </div>
+
+                        <!-- Terminal Live Log Monitor -->
+                        <div class="terminal-box">
+                            <div class="terminal-bar">
+                                <span class="terminal-title"><i class="fa-solid fa-terminal"></i> Real-Vaqt Log Monitor</span>
+                                <span id="log-job-id" class="job-id-tag">JOB: -</span>
+                            </div>
+                            <div id="log-stream-body" class="terminal-body">
+                                <div class="log-entry info">[00:00:00] Tizim tayyor...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="file-status" class="status-banner hidden"></div>
+                </div>
+
+                <!-- Custom Override Dictionary Section -->
+                <div class="dictionary-accordion">
+                    <div class="accordion-header" onclick="toggleDrawer()">
+                        <span><i class="fa-solid fa-book-bookmark"></i> Maxsus Lug'at (Custom Override Dictionary)</span>
+                        <i id="drawer-icon" class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div id="drawer-content" class="accordion-content hidden">
+                        <p class="accordion-desc">Istisno so'zlar, brendlar yoki atoqli otlarni transliteratsiyada o'zgarmasdan chiqishi uchun kiriting:</p>
+                        <div class="dict-input-row">
+                            <input type="text" id="dict-latin" placeholder="Lotin (masalan: Schubert)">
+                            <input type="text" id="dict-cyrillic" placeholder="Kirill (masalan: Шуберт)">
+                            <button class="btn btn-secondary" onclick="addDictRule()"><i class="fa-solid fa-plus"></i> Qo'shish</button>
+                        </div>
+                        <div id="dict-tags" class="dict-badge-list">
+                            <!-- Dynamic Tag Badges -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Developer Integration Snippets Section -->
+        <section id="api-specs" class="code-integration-section">
+            <h2 class="section-heading"><i class="fa-solid fa-code"></i> Dasturchilar uchun Integratsiya (API SDK)</h2>
+            <div class="code-box-card">
+                <div class="code-tab-bar">
+                    <button class="code-tab active" onclick="switchCodeTab('curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCodeTab('python')">Python</button>
+                    <button class="code-tab" onclick="switchCodeTab('js')">JavaScript / Node.js</button>
+                    <button class="code-tab" onclick="switchCodeTab('file_curl')">File Upload (cURL)</button>
+                </div>
+                <div class="code-viewport">
+                    <pre><code id="code-display"></code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-inner">
+            <p>© 2026 UzLang API. O'zbek Tili Infratuzilma Platformasi.</p>
+            <div class="footer-links-group">
+                <a href="/docs" target="_blank">OpenAPI Docs</a>
+                <a href="/redoc" target="_blank">ReDoc Specification</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
