@@ -1,244 +1,644 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UzLang Platform — O'zbek Tili Infratuzilmasi va Transliteratsiya API</title>
-    <meta name="description" content="O'zbek tili uchun enterprise darajasidagi transliteratsiya API platformasi. Kirill va Lotin matnlari hamda PDF, DOCX, TXT hujjatlarini real-vaqtda o'girish.">
-    
-    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Core Stylesheet -->
-    <link rel="stylesheet" href="/static/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UzLang Platform — O'zbek Tili Transliteratsiya Infratuzilmasi</title>
+  <meta name="description" content="O'zbek tili uchun enterprise darajasidagi yuqori tezlikdagi transliteratsiya va hujjat protsessing platformasi.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m5 8 6 6'/><path d='m4 14 6-6 2-3'/><path d='M2 5h12'/><path d='M7 2h1'/><path d='m22 22-5-10-5 10'/><path d='M14 18h6'/></svg>">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN with customized theme configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
-    <!-- Top Glass Navigation Bar -->
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="brand">
-                <div class="logo-mark">
-                    <i class="fa-solid fa-language"></i>
-                </div>
-                <div class="brand-info">
-                    <span class="brand-title">UzLang<span class="brand-accent">API</span></span>
-                    <span class="brand-version">v1.0 • Enterprise</span>
-                </div>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased transition-colors duration-200 min-h-screen flex flex-col dark:bg-slate-950 dark:text-slate-100 light:bg-slate-50 light:text-slate-900 selection:bg-brand-500 selection:text-white">
+
+  <!-- Toast Notification Floating Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- Top Glass Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/80 light:border-slate-200 light:bg-white/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer select-none" onclick="switchTab('text')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/25 ring-1 ring-white/20">
+          <i data-lucide="arrow-right-left" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent dark:from-white dark:to-slate-400 light:from-slate-900 light:to-slate-700">UzLang</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400 light:bg-brand-100 light:text-brand-700">v1.0 Pro</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium tracking-wide dark:text-slate-400 light:text-slate-500">Transliteratsiya Infratuzilmasi</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/60 dark:bg-slate-900/60 dark:border-slate-800/60 light:bg-slate-100 light:border-slate-200">
+        <button id="nav-btn-text" onclick="switchTab('text')" class="nav-tab active flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-white bg-brand-600 shadow-sm shadow-brand-600/30">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Matn</span>
+        </button>
+        <button id="nav-btn-file" onclick="switchTab('file')" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>Hujjatlar</span>
+        </button>
+        <button id="nav-btn-batch" onclick="switchTab('batch')" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Paketli (Batch)</span>
+        </button>
+        <button id="nav-btn-dict" onclick="switchTab('dict')" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i data-lucide="book-marked" class="w-3.5 h-3.5"></i>
+          <span>Lug'at</span>
+        </button>
+        <button id="nav-btn-api" onclick="switchTab('api')" class="nav-tab flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+          <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+          <span>API Docs</span>
+        </button>
+      </nav>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Live API Server Status Indicator -->
+        <div id="api-status-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium" title="FastAPI xizmati faol">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>API: Online</span>
+        </div>
+
+        <!-- Swagger Docs Link -->
+        <a href="/docs" target="_blank" class="hidden sm:flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-brand-400 transition-colors p-2 rounded-lg hover:bg-slate-800/50" title="Swagger UI">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>Docs</span>
+        </a>
+
+        <!-- Dark / Light Theme Toggle -->
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2 rounded-xl border border-slate-800 bg-slate-900/80 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-slate-100 light:border-slate-200 light:bg-slate-100 light:text-slate-600 light:hover:text-slate-900" title="Mavzuni o'zgartirish">
+          <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Subbar -->
+    <div class="md:hidden flex items-center justify-around border-t border-slate-800/60 bg-slate-950 px-2 py-1.5 overflow-x-auto text-[11px] font-medium">
+      <button onclick="switchTab('text')" class="mobile-nav-btn text-brand-400 py-1 px-2.5 flex items-center gap-1" data-tab="text">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Matn
+      </button>
+      <button onclick="switchTab('file')" class="mobile-nav-btn text-slate-400 py-1 px-2.5 flex items-center gap-1" data-tab="file">
+        <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Hujjat
+      </button>
+      <button onclick="switchTab('batch')" class="mobile-nav-btn text-slate-400 py-1 px-2.5 flex items-center gap-1" data-tab="batch">
+        <i data-lucide="layers" class="w-3.5 h-3.5"></i> Batch
+      </button>
+      <button onclick="switchTab('dict')" class="mobile-nav-btn text-slate-400 py-1 px-2.5 flex items-center gap-1" data-tab="dict">
+        <i data-lucide="book-marked" class="w-3.5 h-3.5"></i> Lug'at
+      </button>
+      <button onclick="switchTab('api')" class="mobile-nav-btn text-slate-400 py-1 px-2.5 flex items-center gap-1" data-tab="api">
+        <i data-lucide="code-2" class="w-3.5 h-3.5"></i> API
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Hero Introduction Banner -->
+    <section class="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/60 to-slate-950/80 p-6 sm:p-8 dark:border-slate-800/80 dark:from-slate-900/60 dark:to-slate-950/80 light:border-slate-200 light:from-white light:to-slate-50 shadow-xl">
+      <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-brand-500/10 blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span>100% Native & Tezkor • Orfografik Aniq Dvigatel</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white dark:text-white light:text-slate-900">
+            O'zbek Tili Infratuzilmasi & Transliteratsiya Platformasi
+          </h1>
+          <p class="text-sm text-slate-400 leading-relaxed dark:text-slate-400 light:text-slate-600">
+            Lotin va Kirill yozuvlari o'rtasida fonetik, orfografik va morfologik qoidalar asosida matnlar, kitoblar hamda Word/PDF hujjatlarni o'ta yuqori tezlikda o'girish tizimi.
+          </p>
+        </div>
+
+        <!-- Key Feature Badges Grid -->
+        <div class="grid grid-cols-2 gap-2.5 w-full md:w-auto text-xs shrink-0">
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 dark:bg-slate-900/80 dark:border-slate-800 light:bg-slate-100 light:border-slate-200 light:text-slate-700">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Orfografik aniqlik</span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 dark:bg-slate-900/80 dark:border-slate-800 light:bg-slate-100 light:border-slate-200 light:text-slate-700">
+            <i data-lucide="scan" class="w-4 h-4 text-purple-400"></i>
+            <span>Skaner & OCR</span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 dark:bg-slate-900/80 dark:border-slate-800 light:bg-slate-100 light:border-slate-200 light:text-slate-700">
+            <i data-lucide="file-check-2" class="w-4 h-4 text-blue-400"></i>
+            <span>DOCX / PDF saqlash</span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 dark:bg-slate-900/80 dark:border-slate-800 light:bg-slate-100 light:border-slate-200 light:text-slate-700">
+            <i data-lucide="cpu" class="w-4 h-4 text-amber-400"></i>
+            <span>&lt; 5ms Tezlik</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: MATN TARJIMONI (TEXT TRANSLATOR) -->
+    <!-- ========================================================================= -->
+    <section id="tab-text" class="tab-content active space-y-4 animate-fade-in">
+      
+      <!-- Top Control Bar (Direction, Apostrophe, Preset Samples) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-sm">
+        
+        <!-- Direction Selector with Swap Button -->
+        <div class="flex items-center gap-2">
+          <span id="direction-source-label" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-500/10 text-brand-400 border border-brand-500/20">
+            O'zbekcha (Lotin)
+          </span>
+
+          <button id="btn-swap-direction" onclick="swapDirection()" class="p-1.5 rounded-lg border border-slate-700 hover:border-brand-500 hover:text-brand-400 bg-slate-800/80 text-slate-300 transition-all hover:scale-105 active:scale-95" title="Yo'nalishni almashtirish">
+            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+          </button>
+
+          <span id="direction-target-label" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-500/10 text-brand-400 border border-brand-500/20">
+            Ўзбекча (Кирилл)
+          </span>
+        </div>
+
+        <!-- Target Apostrophe Selector (for Cyrillic -> Latin) -->
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-slate-400 font-medium hidden sm:inline">Apostrof belgisi:</span>
+          <select id="target-apostrophe-select" onchange="onApostropheChange()" class="text-xs rounded-lg px-2.5 py-1.5 bg-slate-950 border border-slate-700 text-slate-200 dark:bg-slate-950 dark:border-slate-700 light:bg-slate-100 light:border-slate-300 light:text-slate-900 outline-none focus:border-brand-500">
+            <option value="'">' (Standart)</option>
+            <option value="ʻ">ʻ (O'zbek lotin o'zagi)</option>
+            <option value="ʼ">ʼ (Modifikator)</option>
+            <option value="’">’ (Egri apostrof)</option>
+          </select>
+        </div>
+
+        <!-- Sample Presets -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs">
+          <span class="text-slate-400 mr-1 hidden lg:inline">Namunalar:</span>
+          <button onclick="loadSample('konstitutsiya')" class="px-2.5 py-1 rounded-md bg-slate-800/70 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700/50 transition-colors">Konstitutsiya</button>
+          <button onclick="loadSample('digraf')" class="px-2.5 py-1 rounded-md bg-slate-800/70 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700/50 transition-colors">Digraf & Tutuq</button>
+          <button onclick="loadSample('grammatika')" class="px-2.5 py-1 rounded-md bg-slate-800/70 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700/50 transition-colors">Grammatika</button>
+          <button onclick="loadSample('ilm')" class="px-2.5 py-1 rounded-md bg-slate-800/70 hover:bg-slate-700 text-slate-300 text-[11px] border border-slate-700/50 transition-colors">Ilm-Fan</button>
+        </div>
+      </div>
+
+      <!-- Dual Textarea Panes -->
+      <div id="dual-editor-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Source Input Pane -->
+        <div class="flex flex-col rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white overflow-hidden shadow-lg focus-within:border-brand-500/60 transition-colors">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/70 bg-slate-950/40 dark:border-slate-800/70 dark:bg-slate-950/40 light:border-slate-200 light:bg-slate-50 text-xs font-semibold text-slate-300">
+            <span id="source-pane-title" class="flex items-center gap-1.5">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>Lotin matni (Kiritish)</span>
+            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="clearSourceText()" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors" title="Tozalash">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="copySourceText()" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-colors" title="Nusxalash">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
+          </div>
+          <textarea id="source-text" rows="12" class="w-full flex-1 p-4 bg-transparent outline-none resize-none font-sans text-sm text-slate-100 dark:text-slate-100 light:text-slate-900 placeholder:text-slate-500 leading-relaxed" placeholder="Matnni shu yerga kiriting yoki nusxalang..." oninput="onSourceInput()" autofocus>O'zbekiston Respublikasi kelajagi buyuk davlatdir. Ma'no va e'tibor bilan shahar va qishloqlarni obod qilamiz.</textarea>
+          <div class="flex items-center justify-between px-4 py-2 border-t border-slate-800/60 bg-slate-950/30 text-[11px] text-slate-400 font-mono">
+            <span id="source-stats">0 belgilar | 0 so'zlar</span>
+            <span class="text-slate-500 hidden sm:inline">Avto-o'girish faol</span>
+          </div>
+        </div>
+
+        <!-- Target Output Pane -->
+        <div class="flex flex-col rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white overflow-hidden shadow-lg">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/70 bg-slate-950/40 dark:border-slate-800/70 dark:bg-slate-950/40 light:border-slate-200 light:bg-slate-50 text-xs font-semibold text-slate-300">
+            <span id="target-pane-title" class="flex items-center gap-1.5 text-brand-400">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-400"></i>
+              <span>Kirill matni (Natija)</span>
+            </span>
+            <div class="flex items-center gap-1.5">
+              <span id="latency-badge" class="speed-badge px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">
+                0.0 ms
+              </span>
+              <button onclick="toggleFullscreen()" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-colors" title="Kattalashtirish">
+                <i id="fullscreen-icon" data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="downloadTargetText()" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-colors" title=".txt fayl qilib yuklab olish">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="copyTargetResult()" class="px-2.5 py-1 rounded bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs flex items-center gap-1 transition-all active:scale-95" title="Natijani nusxalash">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copy-btn-text">Nusxalash</span>
+              </button>
+            </div>
+          </div>
+          <div class="relative flex-1 p-4 overflow-y-auto">
+            <div id="target-text-spinner" class="absolute top-4 right-4 hidden">
+              <i data-lucide="loader-2" class="w-4 h-4 text-brand-400 animate-spin"></i>
+            </div>
+            <div id="target-text" class="text-sm whitespace-pre-wrap font-sans text-slate-100 dark:text-slate-100 light:text-slate-900 leading-relaxed min-h-[200px]"></div>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2 border-t border-slate-800/60 bg-slate-950/30 text-[11px] text-slate-400 font-mono">
+            <span id="target-stats">0 belgilar</span>
+            <span class="text-brand-400 font-semibold flex items-center gap-1">
+              <i data-lucide="cpu" class="w-3 h-3"></i> Context-Engine v1.0
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: HUJJATLAR & KITOB PROTSESSORI (DOCUMENT PROCESSOR) -->
+    <!-- ========================================================================= -->
+    <section id="tab-file" class="tab-content space-y-6 animate-fade-in">
+      
+      <!-- Upload Card / Dropzone -->
+      <div class="p-6 sm:p-8 rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-xl space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+              <i data-lucide="file-up" class="w-5 h-5 text-brand-400"></i>
+              Hujjat va Kitoblarni Transliteratsiya Qilish
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Word (.docx), PDF kitoblar (skaner & matnli) hamda TXT fayllarni orfografik o'girish</p>
+          </div>
+
+          <!-- Document Direction Picker -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">O'girish yo'nalishi:</span>
+            <select id="doc-direction-select" class="text-xs rounded-lg px-3 py-1.5 bg-slate-950 border border-slate-700 text-slate-200 dark:bg-slate-950 dark:border-slate-700 light:bg-slate-100 light:border-slate-300 light:text-slate-900 outline-none focus:border-brand-500 font-medium">
+              <option value="latin_to_cyrillic">Lotin → Kirill</option>
+              <option value="cyrillic_to_latin">Kirill → Lotin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone Box -->
+        <div id="drop-zone" onclick="document.getElementById('file-input').click()" class="drop-zone border-2 border-dashed border-slate-700 hover:border-brand-500 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all bg-slate-950/40 hover:bg-brand-500/5 group">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-400 group-hover:scale-110 transition-transform">
+            <i data-lucide="cloud-upload" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-200 dark:text-slate-200 light:text-slate-800 group-hover:text-brand-400 transition-colors">
+            Faylni shu yerga tashlang yoki tanlang
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">
+            Qo'llab-quvvatlanadi: <strong class="text-slate-300">.PDF</strong> (katta kitoblar & skaner), <strong class="text-slate-300">.DOCX</strong> (Word), <strong class="text-slate-300">.TXT</strong>
+          </p>
+          <input type="file" id="file-input" accept=".docx,.pdf,.txt" onchange="onFileSelected(this.files[0])" class="hidden">
+        </div>
+
+        <!-- Selected File Information Bar -->
+        <div id="file-selected-card" class="hidden p-4 rounded-xl border border-slate-800 bg-slate-950/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div id="file-icon-box" class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-400">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div id="file-name" class="font-semibold text-sm text-slate-200">hujjat.pdf</div>
+              <div id="file-size" class="text-xs text-slate-400">0 KB</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-process-file" onclick="startFileProcessing()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-brand-600/30 transition-all active:scale-95">
+              <i data-lucide="wand-2" class="w-4 h-4"></i>
+              <span>Transliteratsiya Boshlash</span>
+            </button>
+            <button onclick="removeSelectedFile()" class="p-2 rounded-xl border border-slate-700 hover:border-rose-500/50 text-slate-400 hover:text-rose-400 transition-colors" title="Bekor qilish">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-Time Progress & Terminal Monitor -->
+        <div id="file-progress-container" class="hidden space-y-3 p-4 rounded-xl border border-slate-800 bg-slate-950/80">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 font-medium">
+              <i id="progress-spinner" data-lucide="loader-2" class="w-4 h-4 text-brand-400 animate-spin"></i>
+              <span id="progress-status-text">Jarayon navbatga qo'yilmoqda...</span>
+            </div>
+            <span id="progress-percent" class="font-mono text-sm font-bold text-emerald-400">0%</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-emerald-400 rounded-full transition-all duration-300 shadow-sm" style="width: 0%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span id="progress-page-info">Sahifa 0 / 0</span>
+            <span id="progress-time-info">Vaqt: 0.0s</span>
+          </div>
+
+          <!-- Live Terminal Output -->
+          <div class="terminal-window rounded-lg overflow-hidden border border-slate-800">
+            <div class="flex items-center justify-between px-3 py-1.5 border-b border-slate-800 bg-slate-900/60 text-[11px] text-slate-400 font-mono">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-400"></i>
+                <span>Jonli Log Terminali</span>
+              </div>
+              <span id="log-job-id" class="text-brand-400 font-semibold">JOB: -</span>
+            </div>
+            <div id="log-stream-body" class="p-3 h-32 overflow-y-auto font-mono text-xs space-y-1">
+              <div class="text-slate-500">[00:00:00] Tizim tayyor holatda...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success Result Banner & Download Button -->
+        <div id="file-result-banner" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+            <div>
+              <div class="text-xs font-bold text-white">Hujjat muvaffaqiyatli transliteratsiya qilindi!</div>
+              <div id="file-result-filename" class="text-[11px] text-emerald-300">natija.docx</div>
+            </div>
+          </div>
+          <button id="btn-download-result" onclick="downloadCompletedJob()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all active:scale-95">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Faylni Yuklab Olish</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- History of Processed Documents -->
+      <div class="p-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4 text-brand-400"></i>
+            So'nggi Qayta Ishlangan Hujjatlar Tarixi
+          </h3>
+          <button onclick="clearDocHistory()" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">Tarixni tozalash</button>
+        </div>
+        <div id="doc-history-container" class="space-y-2">
+          <div class="text-xs text-slate-500 text-center py-4">Hozircha qayta ishlangan hujjatlar mavjud emas</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: PAKETLI O'GIRISH (BATCH PROCESSOR) -->
+    <!-- ========================================================================= -->
+    <section id="tab-batch" class="tab-content space-y-4 animate-fade-in">
+      <div class="p-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-xl space-y-4">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-brand-400"></i>
+              Paketli Transliteratsiya (Batch Processor)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Bir vaqtning o'zida yuzlab mustaqil matnlar, sarlavhalar yoki iboralarni o'girish</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <select id="batch-direction" class="text-xs rounded-lg px-3 py-1.5 bg-slate-950 border border-slate-700 text-slate-200 dark:bg-slate-950 dark:border-slate-700 light:bg-slate-100 light:border-slate-300 light:text-slate-900 outline-none">
+              <option value="latin_to_cyrillic">Lotin → Kirill</option>
+              <option value="cyrillic_to_latin">Kirill → Lotin</option>
+            </select>
+            <button onclick="runBatchProcessing()" class="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-brand-600/30 transition-all active:scale-95">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+              <span>Barchasini O'girish</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Batch Items Container -->
+        <div id="batch-items-list" class="space-y-2.5">
+          <!-- Rows inserted dynamically by JS -->
+        </div>
+
+        <!-- Bottom Batch Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
+          <button onclick="addBatchItem()" class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-brand-500 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Qator qo'shish</span>
+          </button>
+
+          <div class="flex items-center gap-2 text-xs">
+            <span id="batch-stats-summary" class="text-slate-400 font-mono">3 ta qator</span>
+            <span class="text-slate-600">|</span>
+            <button onclick="copyAllBatchResults()" class="text-slate-400 hover:text-brand-400 transition-colors flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Natijalarni nusxalash
+            </button>
+            <span class="text-slate-600">|</span>
+            <button onclick="downloadBatchJson()" class="text-slate-400 hover:text-brand-400 transition-colors flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> JSON yuklash
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: LUG'AT BOSHQARUVI (DICTIONARY MANAGER) -->
+    <!-- ========================================================================= -->
+    <section id="tab-dict" class="tab-content space-y-6 animate-fade-in">
+      
+      <!-- Add New Custom Override Rule -->
+      <div class="p-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-xl space-y-5">
+        <div>
+          <h2 class="text-lg font-bold text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+            <i data-lucide="book-bookmark" class="w-5 h-5 text-brand-400"></i>
+            Maxsus Istisnolar Lug'ati (Custom Overrides)
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Xorijiy brendlar, shaxs nomlari yoki standart qoidaga to'g'ri kelmaydigan so'zlar uchun qoida belgilash</p>
+        </div>
+
+        <form id="dict-add-form" onsubmit="onAddDictionaryRule(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input type="text" id="dict-latin-input" placeholder="Lotincha (masalan: Schubert yoki Apple)" required class="text-xs rounded-xl px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 outline-none focus:border-brand-500">
+          <input type="text" id="dict-cyrillic-input" placeholder="Kirillcha (masalan: Шуберт yoki Эппл)" required class="text-xs rounded-xl px-3.5 py-2.5 bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 outline-none focus:border-brand-500">
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-600/30 transition-all active:scale-95">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Qoidani Qo'shish</span>
+          </button>
+        </form>
+
+        <!-- Live Instant Rule Tester -->
+        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex flex-col sm:flex-row items-center gap-3">
+          <div class="text-xs font-semibold text-slate-300 shrink-0 flex items-center gap-1.5">
+            <i data-lucide="test-tube" class="w-3.5 h-3.5 text-indigo-400"></i>
+            <span>Tezkor sinov:</span>
+          </div>
+          <input type="text" id="dict-test-input" oninput="onDictTestInput()" placeholder="Sinash uchun so'z kiriting..." class="flex-1 text-xs bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 outline-none focus:border-brand-500">
+          <div class="text-xs text-brand-400 font-mono font-semibold" id="dict-test-output">Natija...</div>
+        </div>
+
+        <!-- Existing Rules List with Search Filter -->
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Faol Istisnolar Ro'yxati</h3>
+            <div class="relative w-48">
+              <input type="text" id="dict-search-input" oninput="filterDictRules()" placeholder="Qidirish..." class="w-full text-xs rounded-lg pl-7 pr-2.5 py-1 bg-slate-950 border border-slate-700 text-slate-200 placeholder:text-slate-500 outline-none focus:border-brand-500">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2 top-2"></i>
+            </div>
+          </div>
+
+          <div id="dict-chips-container" class="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-1">
+            <!-- Chips rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 5: API DOCS & PLAYGROUND (DEVELOPER INTEGRATION) -->
+    <!-- ========================================================================= -->
+    <section id="tab-api" class="tab-content space-y-6 animate-fade-in">
+      
+      <div class="p-6 rounded-2xl border border-slate-800/80 bg-slate-900/60 dark:border-slate-800/80 dark:bg-slate-900/60 light:border-slate-200 light:bg-white shadow-xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-white dark:text-white light:text-slate-900 flex items-center gap-2">
+            <i data-lucide="code-2" class="w-5 h-5 text-brand-400"></i>
+            Dasturchilar uchun REST API Integratsiyasi
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Tizimni Python, Node.js, PHP, Go yoki cURL orqali har qanday tashqi loyihaga integratsiya qiling</p>
+        </div>
+
+        <!-- Code Snippet Box with Tabs -->
+        <div class="rounded-xl border border-slate-800 bg-[#060911] overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/40 gap-2">
+            <div class="flex items-center gap-1">
+              <button onclick="switchCodeSnippetTab('curl')" class="code-tab active text-xs font-semibold px-3 py-1 rounded-md text-white bg-slate-800" data-lang="curl">cURL</button>
+              <button onclick="switchCodeSnippetTab('python')" class="code-tab text-xs font-semibold px-3 py-1 rounded-md text-slate-400 hover:text-slate-200" data-lang="python">Python (requests)</button>
+              <button onclick="switchCodeSnippetTab('httpx')" class="code-tab text-xs font-semibold px-3 py-1 rounded-md text-slate-400 hover:text-slate-200" data-lang="httpx">Python (async httpx)</button>
+              <button onclick="switchCodeSnippetTab('js')" class="code-tab text-xs font-semibold px-3 py-1 rounded-md text-slate-400 hover:text-slate-200" data-lang="js">JavaScript (fetch)</button>
+            </div>
+            <button onclick="copyCodeSnippet()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span id="copy-code-text">Nusxalash</span>
+            </button>
+          </div>
+          <div class="p-4 overflow-x-auto">
+            <pre><code id="api-code-snippet" class="text-xs text-cyan-400 font-mono"></code></pre>
+          </div>
+        </div>
+
+        <!-- Interactive API Request Playground -->
+        <div class="space-y-4 pt-4 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-brand-400"></i>
+              Jonli API So'rov Konsoli (Live Console)
+            </h3>
+            <button onclick="executeApiPlayground()" class="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-brand-600/30 transition-all active:scale-95">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>So'rov yuborish (Send Request)</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <nav class="nav-menu">
-                <a href="#playground" class="nav-link active"><i class="fa-solid fa-terminal"></i> Playground</a>
-                <a href="/docs" target="_blank" class="nav-link"><i class="fa-solid fa-code"></i> API Spec</a>
-                <a href="/v1/ocr/status" target="_blank" class="nav-link"><i class="fa-solid fa-server"></i> OCR Status</a>
-            </nav>
+            <!-- Request Input Editor -->
+            <div class="space-y-2">
+              <label class="text-xs font-semibold text-slate-400">So'rov tanasi (JSON Payload):</label>
+              <textarea id="api-playground-payload" rows="7" class="w-full text-xs font-mono p-3 rounded-xl bg-slate-950 border border-slate-800 text-cyan-300 outline-none focus:border-brand-500 resize-none">{
+  "text": "O'zbekiston Respublikasi - buyuk davlat!",
+  "direction": "latin_to_cyrillic",
+  "target_apostrophe": "'"
+}</textarea>
+            </div>
 
-            <div class="nav-right">
-                <div class="status-indicator">
-                    <span class="pulse-ring"></span>
-                    <span class="status-text">Tizim Faol</span>
+            <!-- Response Preview Box -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold text-slate-400">Server Javobi (Response):</label>
+                <div class="flex items-center gap-2">
+                  <span id="api-response-status" class="hidden text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">200 OK</span>
+                  <span id="api-response-time" class="hidden text-[10px] font-mono text-slate-400">0.0 ms</span>
                 </div>
-                <a href="/docs" target="_blank" class="btn btn-outline-sm">
-                    <i class="fa-solid fa-book-open"></i> Hujjatlar
-                </a>
+              </div>
+              <div class="p-3 rounded-xl bg-[#060911] border border-slate-800 text-xs font-mono h-[142px] overflow-y-auto text-emerald-400">
+                <pre><code id="api-response-display">// 'So'rov yuborish' tugmasini bosing...</code></pre>
+              </div>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Content Container -->
-    <main class="app-main">
-        <!-- Hero Header Section -->
-        <section class="hero-section">
-            <div class="badge-pill">
-                <i class="fa-solid fa-sparkles"></i> High-Speed Uzbek Transliteration Infrastructure
-            </div>
-            <h1 class="hero-heading">O'zbek tili uchun <span class="text-gradient">Aqlli Transliteratsiyalash</span> Platformasi</h1>
-            <p class="hero-subtext">Matnlar, <strong>PDF kitoblar, DOCX va TXT</strong> hujjatlarini Kirill va Lotin alifbolari o'rtasida aniq va tez transliteratsiya qiling.</p>
-        </section>
-
-        <!-- Mode Segmented Control Tabs -->
-        <div class="segmented-control">
-            <button id="mode-text-btn" class="segment-btn active" onclick="switchMode('text')">
-                <i class="fa-solid fa-align-left"></i> Matn Transliteratsiyasi
-            </button>
-            <button id="mode-file-btn" class="segment-btn" onclick="switchMode('file')">
-                <i class="fa-solid fa-file-pdf"></i> Fayl & Skaner Kitob (.pdf, .docx, .txt)
-            </button>
+          </div>
         </div>
 
-        <!-- Interactive Core Playground -->
-        <section id="playground" class="playground-wrapper">
-            <div class="panel-card">
-                
-                <!-- Direction & Sample Controls Bar -->
-                <div class="panel-toolbar">
-                    <div class="direction-switch-group">
-                        <button id="btn-latin-to-cyrillic" class="dir-tab active" onclick="setDirection('latin_to_cyrillic')">
-                            <span>Lotin</span> <i class="fa-solid fa-arrow-right"></i> <span>Kirill</span>
-                        </button>
-                        <button id="swap-btn" class="swap-icon-btn" onclick="swapDirection()" title="Yo'nalishni almashtirish">
-                            <i class="fa-solid fa-right-left"></i>
-                        </button>
-                        <button id="btn-cyrillic-to-latin" class="dir-tab" onclick="setDirection('cyrillic_to_latin')">
-                            <span>Kirill</span> <i class="fa-solid fa-arrow-right"></i> <span>Lotin</span>
-                        </button>
-                    </div>
-
-                    <div id="text-samples" class="sample-chips-group">
-                        <span class="sample-title">Namunalar:</span>
-                        <button class="chip-btn" onclick="loadSample(1)">Konstitutsiya</button>
-                        <button class="chip-btn" onclick="loadSample(2)">Digraf & Tutuq</button>
-                        <button class="chip-btn" onclick="loadSample(3)">Grammatika</button>
-                    </div>
-                </div>
-
-                <!-- Mode 1: Live Dual Text Editors -->
-                <div id="text-mode-view" class="dual-editor-grid">
-                    <!-- Source Text Pane -->
-                    <div class="editor-column source-column">
-                        <div class="pane-bar">
-                            <span id="source-label" class="pane-heading"><i class="fa-solid fa-pen-to-square"></i> Lotin matni (Manba)</span>
-                            <button class="action-icon-btn" onclick="clearSource()" title="Tozalash"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                        <textarea id="source-text" placeholder="Matnni shu yerga kiriting..." oninput="onSourceInput()" autofocus>O'zbekiston Respublikasi kelajagi buyuk davlatdir. Ma'no va e'tibor bilan shahar va qishloqlarni obod qilamiz.</textarea>
-                        <div class="pane-status">
-                            <span id="source-stats">0 belgilar | 0 so'zlar</span>
-                        </div>
-                    </div>
-
-                    <!-- Target Text Pane -->
-                    <div class="editor-column target-column">
-                        <div class="pane-bar">
-                            <span id="target-label" class="pane-heading"><i class="fa-solid fa-bolt"></i> Kirill matni (Natija)</span>
-                            <div class="pane-right-actions">
-                                <span id="latency-badge" class="speed-pill"><i class="fa-solid fa-stopwatch"></i> 0.0 ms</span>
-                                <button class="action-icon-btn" onclick="copyResult()" title="Nusxalash"><i class="fa-solid fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <div id="target-text" class="output-preview"></div>
-                        <div class="pane-status">
-                            <span id="target-stats">0 belgilar</span>
-                            <span class="engine-badge"><i class="fa-solid fa-microchip"></i> Context-Engine v1.0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mode 2: Document & Book Processing View -->
-                <div id="file-mode-view" class="file-processing-view hidden">
-                    <div class="drop-zone-box" id="drop-zone" onclick="document.getElementById('file-input').click()">
-                        <div class="upload-icon-wrapper">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
-                        <h3 class="drop-heading">Hujjat yoki Kitobni shu yerga tashlang</h3>
-                        <p class="drop-subtext">Qo'llab-quvvatlanadi: <strong>.PDF (skaner va matn), .DOCX, .TXT</strong></p>
-                        <input type="file" id="file-input" accept=".docx,.pdf,.txt" onchange="onFileSelected(this.files[0])" hidden>
-                    </div>
-
-                    <!-- File Details Card -->
-                    <div id="file-selected-card" class="file-card hidden">
-                        <div class="file-card-info">
-                            <div class="file-card-icon">
-                                <i id="file-type-icon" class="fa-solid fa-file-pdf"></i>
-                            </div>
-                            <div class="file-card-text">
-                                <span id="file-name" class="file-card-name">hujjat.pdf</span>
-                                <span id="file-size" class="file-card-size">0 KB</span>
-                            </div>
-                        </div>
-                        <div class="file-card-actions">
-                            <button id="btn-process-file" class="btn btn-primary" onclick="uploadAndTransliterateFile()">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Transliteratsiya va Yuklab olish
-                            </button>
-                            <button class="action-icon-btn" onclick="removeSelectedFile()" title="O'chirish"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Progress and Live OCR Logs Card -->
-                    <div id="file-progress-container" class="progress-log-card hidden">
-                        <div class="progress-card-header">
-                            <span class="progress-title-text">
-                                <i id="progress-spinner" class="fa-solid fa-spinner fa-spin hidden"></i> 
-                                <span id="progress-status-text">Jarayon boshlanmoqda...</span>
-                            </span>
-                            <span id="progress-percent" class="progress-percentage">0%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div id="progress-bar-fill" class="progress-fill" style="width: 0%;"></div>
-                        </div>
-                        <div class="progress-meta">
-                            <span id="progress-page-info">Sahifa 0 / 0</span>
-                            <span id="progress-time-info">Vaqt: 0.0s</span>
-                        </div>
-
-                        <!-- Terminal Live Log Monitor -->
-                        <div class="terminal-box">
-                            <div class="terminal-bar">
-                                <span class="terminal-title"><i class="fa-solid fa-terminal"></i> Real-Vaqt Log Monitor</span>
-                                <span id="log-job-id" class="job-id-tag">JOB: -</span>
-                            </div>
-                            <div id="log-stream-body" class="terminal-body">
-                                <div class="log-entry info">[00:00:00] Tizim tayyor...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="file-status" class="status-banner hidden"></div>
-                </div>
-
-                <!-- Custom Override Dictionary Section -->
-                <div class="dictionary-accordion">
-                    <div class="accordion-header" onclick="toggleDrawer()">
-                        <span><i class="fa-solid fa-book-bookmark"></i> Maxsus Lug'at (Custom Override Dictionary)</span>
-                        <i id="drawer-icon" class="fa-solid fa-chevron-down"></i>
-                    </div>
-                    <div id="drawer-content" class="accordion-content hidden">
-                        <p class="accordion-desc">Istisno so'zlar, brendlar yoki atoqli otlarni transliteratsiyada o'zgarmasdan chiqishi uchun kiriting:</p>
-                        <div class="dict-input-row">
-                            <input type="text" id="dict-latin" placeholder="Lotin (masalan: Schubert)">
-                            <input type="text" id="dict-cyrillic" placeholder="Kirill (masalan: Шуберт)">
-                            <button class="btn btn-secondary" onclick="addDictRule()"><i class="fa-solid fa-plus"></i> Qo'shish</button>
-                        </div>
-                        <div id="dict-tags" class="dict-badge-list">
-                            <!-- Dynamic Tag Badges -->
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Developer Integration Snippets Section -->
-        <section id="api-specs" class="code-integration-section">
-            <h2 class="section-heading"><i class="fa-solid fa-code"></i> Dasturchilar uchun Integratsiya (API SDK)</h2>
-            <div class="code-box-card">
-                <div class="code-tab-bar">
-                    <button class="code-tab active" onclick="switchCodeTab('curl')">cURL</button>
-                    <button class="code-tab" onclick="switchCodeTab('python')">Python</button>
-                    <button class="code-tab" onclick="switchCodeTab('js')">JavaScript / Node.js</button>
-                    <button class="code-tab" onclick="switchCodeTab('file_curl')">File Upload (cURL)</button>
-                </div>
-                <div class="code-viewport">
-                    <pre><code id="code-display"></code></pre>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-        <div class="footer-inner">
-            <p>© 2026 UzLang API. O'zbek Tili Infratuzilma Platformasi.</p>
-            <div class="footer-links-group">
-                <a href="/docs" target="_blank">OpenAPI Docs</a>
-                <a href="/redoc" target="_blank">ReDoc Specification</a>
-            </div>
+        <!-- Documentation Links -->
+        <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400">
+          <span>OpenAPI / Swagger to'liq interaktiv spetsifikatsiyasi serverda mavjud:</span>
+          <div class="flex items-center gap-3">
+            <a href="/docs" target="_blank" class="text-brand-400 hover:underline flex items-center gap-1 font-semibold">
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Swagger UI (/docs)
+            </a>
+            <span class="text-slate-600">•</span>
+            <a href="/redoc" target="_blank" class="text-brand-400 hover:underline flex items-center gap-1 font-semibold">
+              <i data-lucide="file-code" class="w-3.5 h-3.5"></i> ReDoc Spec (/redoc)
+            </a>
+          </div>
         </div>
-    </footer>
 
-    <script src="/static/app.js"></script>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-md py-6 dark:border-slate-800/80 dark:bg-slate-950/60 light:border-slate-200 light:bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-200 dark:text-slate-200 light:text-slate-800">UzLang Platform</span>
+        <span>•</span>
+        <span>Yengil & Tezkor Native Frontend</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/docs" target="_blank" class="hover:text-brand-400 transition-colors">API Docs</a>
+        <a href="/redoc" target="_blank" class="hover:text-brand-400 transition-colors">ReDoc</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-500">© 2026 UzLang API. Barcha huquqlar himoyalangan.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Logic JavaScript -->
+  <script src="/static/app.js"></script>
 </body>
 </html>

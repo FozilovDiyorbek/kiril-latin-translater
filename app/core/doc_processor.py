@@ -15,9 +15,11 @@ def is_watermark_line(line: str) -> bool:
     line_lower = line.strip().lower()
     if not line_lower:
         return False
-    for kw in WATERMARK_KEYWORDS:
-        if kw in line_lower:
-            return True
+    # Check for actual domain links or standalone watermark signatures
+    if "ziyouz.com" in line_lower or "www.ziyouz" in line_lower:
+        return True
+    if line_lower in ("kutubxona", "kutubxonasi", "watermark") or line_lower.startswith(("http://", "https://")):
+        return True
     return False
 
 def clean_watermarks(text: str) -> str:
@@ -145,7 +147,7 @@ class DocumentProcessor:
     def _process_pdf(self, file_bytes: bytes, filename: str, direction: str, job_id: Optional[str] = None) -> Tuple[bytes, str, str]:
         import fitz  # PyMuPDF
         from reportlab.lib.pagesizes import letter
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from app.core.ocr_engine import ocr_engine
         from app.core.job_manager import job_manager
@@ -155,19 +157,33 @@ class DocumentProcessor:
         total_pages = len(doc)
         extracted_pages = []
 
+        is_scanned_doc = False
+
         for i, page in enumerate(doc):
             raw_text = page.get_text("text") or ""
             text_cleaned = clean_watermarks(raw_text)
 
             is_ocr = False
             # If cleaned text is very short/empty, run OCR on the scanned page image if Tesseract available
-            if len(text_cleaned.strip()) < 15 and ocr_engine.is_tesseract_installed():
-                is_ocr = True
-                ocr_text = ocr_engine._ocr_pdf_page(page)
-                text_cleaned = clean_watermarks(ocr_text)
+            if len(text_cleaned.strip()) < 15:
+                if ocr_engine.is_tesseract_installed():
+                    is_ocr = True
+                    try:
+                        ocr_text = ocr_engine._ocr_pdf_page(page)
+                        text_cleaned = clean_watermarks(ocr_text)
+                    except Exception as err:
+                        if job_id:
+                            job_manager.update_progress(job_id, i + 1, total_pages, log_msg=f"OCR Xatosi: {err}")
+                else:
+                    is_scanned_doc = True
 
             if job_id:
-                log_tag = "OCR Active" if is_ocr else "Text Extracted"
+                if is_ocr:
+                    log_tag = "OCR orqali matn tanildi"
+                elif text_cleaned.strip():
+                    log_tag = "Matn ajratib olindi"
+                else:
+                    log_tag = "Bo'sh yoki rasmli sahifa (OCR faol emas)"
                 job_manager.update_progress(job_id, i + 1, total_pages, log_msg=log_tag)
 
             if text_cleaned.strip():
@@ -175,6 +191,18 @@ class DocumentProcessor:
                 extracted_pages.append(trans_text)
             else:
                 extracted_pages.append("")
+
+        # Check if NO text was extracted from the entire document
+        total_chars = sum(len(p.strip()) for p in extracted_pages)
+        if total_chars == 0:
+            if is_scanned_doc and not ocr_engine.is_tesseract_installed():
+                raise ValueError(
+                    f"Ushbu PDF ({total_pages} sahifa) skanerlangan rasm formatidagi kitob hisoblanadi. "
+                    "Unda raqamli matn qatlami (selectable text) mavjud emas. Skanerlangan kitoblarni o'qish uchun "
+                    "serverda Tesseract OCR dasturi o'rnatilgan bo'lishi shart."
+                )
+            else:
+                raise ValueError(f"Ushbu PDF faylidan ({total_pages} sahifa) hech qanday matn ajratib olinmadi.")
 
         # Re-build PDF using ReportLab with registered Unicode font
         out_io = io.BytesIO()
@@ -197,6 +225,11 @@ class DocumentProcessor:
                         safe_text = paragraph_str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                         story.append(Paragraph(safe_text, custom_style))
                         story.append(Spacer(1, 4))
+                if i < len(extracted_pages) - 1:
+                    story.append(PageBreak())
+
+        if not story:
+            raise ValueError("Qayta ishlash uchun matn bloklari mavjud emas.")
 
         pdf_doc.build(story)
         out_io.seek(0)
