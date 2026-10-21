@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from app.api.v1.transliteration import router as v1_router
+from app.core.ocr_engine import ocr_engine
 
 app = FastAPI(
     title="UzLang Transliteration Infrastructure API",
@@ -23,14 +24,30 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Enable CORS for cross-origin client apps
+# Configurable CORS origins for production deployment
+raw_origins = os.environ.get("CORS_ORIGINS", "*")
+allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+is_wildcard = "*" in allowed_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=allowed_origins,
+    allow_credentials=not is_wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Healthcheck endpoints for Docker, Kubernetes, Render, Nginx
+@app.get("/health", tags=["System"], summary="Health Check")
+@app.get("/healthz", tags=["System"], include_in_schema=False)
+async def health_check():
+    """Service liveness and readiness probe for load balancers & container orchestrators."""
+    return {
+        "status": "healthy",
+        "service": "uzlang-transliteration",
+        "version": "1.0.0",
+        "ocr_available": ocr_engine.is_tesseract_installed(),
+    }
 
 # Mount API V1 routes
 app.include_router(v1_router)
@@ -43,8 +60,8 @@ if os.path.exists(STATIC_DIR):
     @app.get("/", include_in_schema=False)
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str = ""):
-        # Don't intercept API or docs routes
-        if full_path.startswith(("v1", "docs", "redoc", "openapi.json")):
+        # Don't intercept API, system health, or docs routes
+        if full_path.startswith(("v1", "docs", "redoc", "openapi.json", "health", "healthz", "gradio")):
             raise HTTPException(status_code=404, detail="Not Found")
         target = os.path.join(STATIC_DIR, full_path)
         if full_path and os.path.isfile(target):

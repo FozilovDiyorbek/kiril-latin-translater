@@ -210,7 +210,7 @@ class TransliterationEngine:
                 is_start = (i == 0)
                 prev_is_vowel = (prev_char.lower() in CYRILLIC_VOWELS or prev_char in "ъЪьЬ")
                 if is_start or prev_is_vowel:
-                    res.append('Ye' if char.isupper() else 'ye')
+                    res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'YE', 'Ye', 'ye'))
                 else:
                     res.append('E' if char.isupper() else 'e')
                 i += 1
@@ -218,15 +218,15 @@ class TransliterationEngine:
 
             # 2. Check 'ё', 'ю', 'я'
             if char_lower == 'ё':
-                res.append('Yo' if char.isupper() else 'yo')
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'YO', 'Yo', 'yo'))
                 i += 1
                 continue
             if char_lower == 'ю':
-                res.append('Yu' if char.isupper() else 'yu')
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'YU', 'Yu', 'yu'))
                 i += 1
                 continue
             if char_lower == 'я':
-                res.append('Ya' if char.isupper() else 'ya')
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'YA', 'Ya', 'ya'))
                 i += 1
                 continue
 
@@ -242,13 +242,17 @@ class TransliterationEngine:
                 i += 1
                 continue
 
-            # 4. Check 'ш', 'ч'
+            # 4. Check 'ш', 'ч', 'щ'
             if char_lower == 'ш':
-                res.append('Sh' if char.isupper() else 'sh')
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'SH', 'Sh', 'sh'))
                 i += 1
                 continue
             if char_lower == 'ч':
-                res.append('Ch' if char.isupper() else 'ch')
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'CH', 'Ch', 'ch'))
+                i += 1
+                continue
+            if char_lower == 'щ':
+                res.append(self._cyrillic_digraph_case(char, next_char, prev_char, word, 'SH', 'Sh', 'sh'))
                 i += 1
                 continue
 
@@ -285,6 +289,24 @@ class TransliterationEngine:
         elif c1.isupper() and c2.islower():
             return title_upper if title_upper else cap[0] + low[1:]
         return low
+
+    def _cyrillic_digraph_case(
+        self,
+        char: str,
+        next_char: str,
+        prev_char: str,
+        full_word: str,
+        upper_str: str,
+        title_str: str,
+        lower_str: str
+    ) -> str:
+        if not char.isupper():
+            return lower_str
+        if full_word.isupper():
+            return upper_str
+        if (next_char and next_char.isupper()) or (prev_char and prev_char.isupper()):
+            return upper_str
+        return title_str
 
 # Singleton instance
 transliterator = TransliterationEngine()

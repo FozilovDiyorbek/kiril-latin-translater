@@ -1,5 +1,17 @@
-.pytest_cache/
+# Python virtual environments
 venv/
 .venv/
-app/__pycache__/
-tests/__pycache__/
+env/
+
+# Python bytecode and caches
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Frontend node_modules
+frontend/node_modules/
+
+# OS specific files
+.DS_Store
+Thumbs.db

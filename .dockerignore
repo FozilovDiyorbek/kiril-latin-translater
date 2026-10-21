@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 .git/
 .gitignore
-frontend/node_modules/
+frontend/
 tests/
 run.bat
+*.md

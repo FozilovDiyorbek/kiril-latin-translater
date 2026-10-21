@@ -12,12 +12,41 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(
 logger = logging.getLogger("UzLang_JobManager")
 
 class JobManager:
-    """Tracks background document processing tasks."""
+    """Tracks background document processing tasks with TTL & memory leak protection."""
 
-    def __init__(self):
+    def __init__(self, max_job_age_seconds: int = 3600, max_completed_jobs: int = 50):
         self.jobs: Dict[str, Dict[str, Any]] = {}
+        self.max_job_age_seconds = max_job_age_seconds
+        self.max_completed_jobs = max_completed_jobs
+
+    def _cleanup_expired_jobs(self):
+        """Prunes jobs older than TTL and limits total jobs to prevent memory leaks."""
+        now = time.time()
+        # 1. Remove jobs that expired past max_job_age_seconds
+        expired_ids = [
+            jid for jid, j in self.jobs.items()
+            if (now - j.get("start_time", now)) > self.max_job_age_seconds
+        ]
+        for jid in expired_ids:
+            logger.info(f"Purging expired job {jid} to reclaim memory")
+            del self.jobs[jid]
+
+        # 2. If completed/failed jobs still exceed max_completed_jobs, prune the oldest ones
+        completed_or_failed = [
+            (jid, j.get("start_time", 0))
+            for jid, j in self.jobs.items()
+            if j.get("status") in ("completed", "failed")
+        ]
+        if len(completed_or_failed) > self.max_completed_jobs:
+            completed_or_failed.sort(key=lambda x: x[1])
+            excess_count = len(completed_or_failed) - self.max_completed_jobs
+            for jid, _ in completed_or_failed[:excess_count]:
+                logger.info(f"Pruning excess completed job {jid}")
+                if jid in self.jobs:
+                    del self.jobs[jid]
 
     def create_job(self, filename: str, direction: str) -> str:
+        self._cleanup_expired_jobs()
         job_id = f"job_{uuid.uuid4().hex[:10]}"
         self.jobs[job_id] = {
             "job_id": job_id,
@@ -106,6 +135,14 @@ class JobManager:
             return None
         job = self.jobs[job_id]
         return job["output_bytes"], job["output_filename"], job["mime_type"]
+
+    def delete_job(self, job_id: str) -> bool:
+        """Explicitly deletes a job and frees its memory."""
+        if job_id in self.jobs:
+            del self.jobs[job_id]
+            logger.info(f"Deleted job {job_id} and freed resources")
+            return True
+        return False
 
 # Singleton instance
 job_manager = JobManager()

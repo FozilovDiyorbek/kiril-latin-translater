@@ -66,3 +66,17 @@ def test_russian_keyboard_cyrillic_smart_correction():
     assert transliterator.transliterate("Узбекистон Республикаси конуний хукуклари.", "cyrillic_to_latin")[0] == "O'zbekiston Respublikasi qonuniy huquqlari."
     assert transliterator.transliterate("Иссик ва совук кунларда кулок ва соглиқни асранг.", "cyrillic_to_latin")[0] == "Issiq va sovuq kunlarda quloq va sog'liqni asrang."
     assert transliterator.transliterate("Бог ва тог атрофида буюк бинолар бор.", "cyrillic_to_latin")[0] == "Bog' va tog' atrofida buyuk binolar bor."
+
+def test_all_caps_cyrillic_to_latin():
+    assert transliterator.transliterate("ШАҲАР", "cyrillic_to_latin")[0] == "SHAHAR"
+    assert transliterator.transliterate("ЧОЙХОНА", "cyrillic_to_latin")[0] == "CHOYXONA"
+    assert transliterator.transliterate("ЯНГИ", "cyrillic_to_latin")[0] == "YANGI"
+    assert transliterator.transliterate("ЕВРОПА", "cyrillic_to_latin")[0] == "YEVROPA"
+    assert transliterator.transliterate("ЮКСАК", "cyrillic_to_latin")[0] == "YUKSAK"
+    assert transliterator.transliterate("ЎЗБЕКИСТОН", "cyrillic_to_latin")[0] == "O'ZBEKISTON"
+    assert transliterator.transliterate("ҒАЛАБА", "cyrillic_to_latin")[0] == "G'ALABA"
+
+def test_hamkorlik_dictionary_fix():
+    assert transliterator.transliterate("Хамкорлик", "cyrillic_to_latin")[0] == "Hamkorlik"
+    assert transliterator.transliterate("хамкорлик", "cyrillic_to_latin")[0] == "hamkorlik"
+    assert transliterator.transliterate("ХАМКОРЛИК", "cyrillic_to_latin")[0] == "HAMKORLIK"

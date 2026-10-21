@@ -51,12 +51,12 @@ class DictionaryManager:
             # --- H words (Russian х -> h) ---
             "хаёт": "hayot", "хаётий": "hayotiy", "хурмат": "hurmat", "хурматли": "hurmatli",
             "шахар": "shahar", "шахри": "shahri", "хамма": "hamma", "хаммаси": "hammasi",
-            "хабар": "habar", "хаво": "havo", "хеч": "hech", "харакат": "harakat",
+            "хаво": "havo", "хеч": "hech", "харакат": "harakat",
             "хак": "haq", "хакида": "haqida", "хакидаги": "haqidagi",
             "хукумат": "hukumat", "худуд": "hudud", "худудий": "hududiy", "хозир": "hozir",
             "хозирги": "hozirgi", "хол": "hol", "холат": "holat", "холда": "holda",
             "хисоб": "hisob", "хисобот": "hisobot", "хисобланган": "hisoblangan",
-            "хам": "ham", "хамиша": "hamisha", "хамкор": "hamkor", "хамкорлик": "hamkorлик",
+            "хам": "ham", "хамиша": "hamisha", "хамкор": "hamkor", "хамкорлик": "hamkorlik",
             "хафта": "hafta", "хунар": "hunar",
 
             # --- O' words (Russian у/о -> o') ---

@@ -47,6 +47,10 @@ class DocumentProcessor:
             ("Segoe_Uz", "C:\\Windows\\Fonts\\segoeui.ttf"),
             ("Times_Uz", "C:\\Windows\\Fonts\\times.ttf"),
             ("DejaVu_Uz", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            ("DejaVu_Uz2", "/usr/share/fonts/dejavu/DejaVuSans.ttf"),
+            ("DejaVu_Uz3", "/usr/share/fonts/TTF/DejaVuSans.ttf"),
+            ("Liberation_Uz", "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
+            ("Liberation_Uz2", "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf"),
             ("FreeSans_Uz", "/usr/share/fonts/truetype/freefont/FreeSans.ttf")
         ]
 

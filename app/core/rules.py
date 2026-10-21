@@ -67,6 +67,8 @@ CYRILLIC_TO_LATIN_SINGLE: Dict[str, str] = {
     'ҳ': 'h', 'Ҳ': 'H',
     'қ': 'q', 'Қ': 'Q',
     'э': 'e', 'Э': 'E',
+    'щ': 'sh', 'Щ': 'Sh',
+    'ы': 'i',  'Ы': 'I',
     'ь': '',  'Ь': '',  # Soft sign is omitted or converted contextually
 }
 
@@ -81,8 +83,6 @@ def apply_case(original: str, converted: str) -> str:
     """Applies original token case (UPPERCASE, Titlecase, lowercase) to converted string."""
     if original.isupper():
         return converted.upper()
-    elif original.istitle():
+    elif original.istitle() or (len(original) > 0 and original[0].isupper() and original.islower() == False and any(c.islower() for c in original)):
         return converted.capitalize()
-        if len(converted) > 1 and len(original) > 1 and original[1].isupper():
-            return converted.upper()
     return converted
