@@ -1,14 +1,3 @@
----
-title: UzLang Transliteration Infrastructure
-emoji: 🔄
-colorFrom: indigo
-colorTo: purple
-sdk: gradio
-sdk_version: 5.16.0
-app_file: app.py
-pinned: false
----
-
 # UzLang Transliteration Infrastructure
 
 O'zbek tili uchun enterprise darajasidagi yuqori tezlikdagi Lotin ↔ Kirill transliteratsiyasi va hujjatlar (DOCX, PDF, OCR) protsessing platformasi.
@@ -27,7 +16,7 @@ O'zbek tili uchun enterprise darajasidagi yuqori tezlikdagi Lotin ↔ Kirill tra
 #### Docker orqali:
 ```bash
 docker build -t uzlang-transliteration .
-docker run -p 7860:7860 uzlang-transliteration
+docker run -p 8000:8000 uzlang-transliteration
 ```
 
 #### Mahalliy kompyuterda (Python 3.11):

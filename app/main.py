@@ -61,7 +61,7 @@ if os.path.exists(STATIC_DIR):
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str = ""):
         # Don't intercept API, system health, or docs routes
-        if full_path.startswith(("v1", "docs", "redoc", "openapi.json", "health", "healthz", "gradio")):
+        if full_path.startswith(("v1", "docs", "redoc", "openapi.json", "health", "healthz")):
             raise HTTPException(status_code=404, detail="Not Found")
         target = os.path.join(STATIC_DIR, full_path)
         if full_path and os.path.isfile(target):
